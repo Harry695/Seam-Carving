@@ -60,78 +60,151 @@ public class SeamCarver {
   }
 
   // sequence of indices for horizontal seam
-  // public int[] findHorizontalSeam()
-
-  // sequence of indices for vertical seam
-	// traverse each row, relax each pixel, check shortest sum of bottom row of pixels
-  public int[] findVerticalSeam() { 
+  public int[] findHorizontalSeam() {
     int[][] edgeTo = new int[picture.height()][picture.width()];
     double[][] distTo = new double[picture.height()][picture.width()];
 
-		// set all distTo to infinity except first row
+    // set all distTo to infinity except first col
+    for (int x = 0; x < picture.width(); x++) {
+      for (int y = 0; y < picture.height(); y++) {
+        if (x == 0) {
+          distTo[y][x] = energy(x, y);
+        } else {
+          distTo[y][x] = Double.POSITIVE_INFINITY;
+        }
+      }
+    }
+
+    // traverse picture col major, relax every node
+    for (int x = 0; x < picture.width() - 1; x++) {
+      for (int y = 0; y < picture.height(); y++) {
+        // upper right
+        if (y != 0 && distTo[y - 1][x + 1] > distTo[y][x] + energy(x + 1, y - 1)) {
+          distTo[y - 1][x + 1] = distTo[y][x] + energy(x + 1, y - 1);
+          edgeTo[y - 1][x + 1] = y;
+        }
+
+        // middle right
+        if (distTo[y][x + 1] > distTo[y][x] + energy(x + 1, y)) {
+          distTo[y][x + 1] = distTo[y][x] + energy(x + 1, y);
+          edgeTo[y][x + 1] = y;
+        }
+
+        // lower right
+        if (y != picture.height() - 1
+            && distTo[y + 1][x + 1] > distTo[y][x] + energy(x + 1, y + 1)) {
+          distTo[y + 1][x + 1] = distTo[y][x] + energy(x + 1, y + 1);
+          edgeTo[y + 1][x + 1] = y;
+        }
+      }
+    }
+
+    // go through last col, find the smallest dist to top
+    int minIndex = -1;
+    double minDist = Double.POSITIVE_INFINITY;
+    for (int y = 0; y < picture.height(); y++) {
+      if (distTo[y][picture.width() - 1] < minDist) {
+        minDist = distTo[y][picture.width() - 1];
+        minIndex = y;
+      }
+
+      // debug
+      // System.out.println("edgeTo");
+      // System.out.println(edgeTo[1][x]);
+    }
+
+    // backtrack to leftmost col
+    int[] sequence = new int[picture.width()];
+    int nextY = minIndex;
+    for (int x = picture.width() - 1; x >= 0; x--) { // bottom row to top row
+      // System.out.println("y = " + y);
+      sequence[x] = nextY; // store the y value of vertex in shortest path at current col
+      // System.out.println("just added " + sequence[y] + " to sequence");
+      nextY =
+          edgeTo[nextY][
+              x]; // backtrack, find the previous vertex that had the "edge to" this vertex
+      // System.out.println("next x: " + nextX);
+    }
+
+    // debug
+    // for (int i : sequence) {
+    // 	System.out.println(i);
+    // }
+
+    return sequence;
+  }
+
+  // sequence of indices for vertical seam
+  // traverse each row, relax each pixel, check shortest sum of bottom row of pixels
+  public int[] findVerticalSeam() {
+    int[][] edgeTo = new int[picture.height()][picture.width()];
+    double[][] distTo = new double[picture.height()][picture.width()];
+
+    // set all distTo to infinity except first row
     for (int y = 0; y < picture.height(); y++) {
       for (int x = 0; x < picture.width(); x++) {
-				if (y == 0) {
-					distTo[y][x] = energy(x, y);
-				} else {
-					distTo[y][x] = Double.POSITIVE_INFINITY;
-				}
+        if (y == 0) {
+          distTo[y][x] = energy(x, y);
+        } else {
+          distTo[y][x] = Double.POSITIVE_INFINITY;
+        }
       }
     }
 
-		// traverse picture row major, relax every node
-		for (int y = 0; y < picture.height() - 1; y++) {
+    // traverse picture row major, relax every node
+    for (int y = 0; y < picture.height() - 1; y++) {
       for (int x = 0; x < picture.width(); x++) {
 
-				// lower left
-        if (x != 0 && distTo[y+1][x-1] > distTo[y][x] + energy(x-1, y+1)) {
-					distTo[y+1][x-1] = distTo[y][x] + energy(x-1, y+1);
-					edgeTo[y+1][x-1] = x;
-				}
+        // lower left
+        if (x != 0 && distTo[y + 1][x - 1] > distTo[y][x] + energy(x - 1, y + 1)) {
+          distTo[y + 1][x - 1] = distTo[y][x] + energy(x - 1, y + 1);
+          edgeTo[y + 1][x - 1] = x;
+        }
 
-				// lower middle
-				if (distTo[y+1][x] > distTo[y][x] + energy(x, y+1)) {
-					distTo[y+1][x] = distTo[y][x] + energy(x, y+1);
-					edgeTo[y+1][x] = x;
-				}
+        // lower middle
+        if (distTo[y + 1][x] > distTo[y][x] + energy(x, y + 1)) {
+          distTo[y + 1][x] = distTo[y][x] + energy(x, y + 1);
+          edgeTo[y + 1][x] = x;
+        }
 
-				// lower right
-				if (x != picture.width() - 1 && distTo[y+1][x+1] > distTo[y][x] + energy(x+1, y+1)) {
-					distTo[y+1][x+1] = distTo[y][x] + energy(x+1, y+1);
-					edgeTo[y+1][x+1] = x;
-				}
+        // lower right
+        if (x != picture.width() - 1
+            && distTo[y + 1][x + 1] > distTo[y][x] + energy(x + 1, y + 1)) {
+          distTo[y + 1][x + 1] = distTo[y][x] + energy(x + 1, y + 1);
+          edgeTo[y + 1][x + 1] = x;
+        }
       }
     }
 
-		// go through last row, find the smallest dist to top
-		int minIndex = -1;
-		double minDist = Double.POSITIVE_INFINITY;
+    // go through last row, find the smallest dist to top
+    int minIndex = -1;
+    double minDist = Double.POSITIVE_INFINITY;
     for (int x = 0; x < picture.width(); x++) {
-			if (distTo[picture.height()-1][x] < minDist) {
-				minDist = distTo[picture.height()-1][x];
-				minIndex = x;
-			}
+      if (distTo[picture.height() - 1][x] < minDist) {
+        minDist = distTo[picture.height() - 1][x];
+        minIndex = x;
+      }
 
-			//debug
-			// System.out.println("edgeTo");
-			// System.out.println(edgeTo[1][x]);
-		}
+      // debug
+      // System.out.println("edgeTo");
+      // System.out.println(edgeTo[1][x]);
+    }
 
-		// backtrack to top
-		int[] sequence = new int[picture.height()];
-		int nextX = minIndex;
-		for (int y = picture.height()-1; y >= 0; y--) {
-			// System.out.println("y = " + y);
-			sequence[y] = nextX;
-			// System.out.println("just added " + sequence[y] + " to sequence");
-			nextX = edgeTo[y][nextX];
-			// System.out.println("next x: " + nextX);
-		}
+    // backtrack to top
+    int[] sequence = new int[picture.height()];
+    int nextX = minIndex;
+    for (int y = picture.height() - 1; y >= 0; y--) { // bottom row to top row
+      // System.out.println("y = " + y);
+      sequence[y] = nextX; // store the x value of vertex in shortest path at current row
+      // System.out.println("just added " + sequence[y] + " to sequence");
+      nextX = edgeTo[y][nextX]; // backtrack, find the previous vertex that had the "edge to" this vertex
+      // System.out.println("next x: " + nextX);
+    }
 
-		// debug
-		// for (int i : sequence) {
-		// 	System.out.println(i);
-		// }
+    // debug
+    // for (int i : sequence) {
+    // 	System.out.println(i);
+    // }
 
     return sequence;
   }
