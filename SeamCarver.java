@@ -210,7 +210,38 @@ public class SeamCarver {
   }
 
   // remove horizontal seam from current picture
-  // public void removeHorizontalSeam(int[] seam)
+  public void removeHorizontalSeam(int[] seam) {
+    Picture newPicture = new Picture(picture.width(), picture.height()-1);
+    double[][] newEnergy = new double[picture.height()-1][picture.width()];
+
+    // put & shift pixels to new image
+    for (int x = 0; x < newPicture.width(); x++) {
+      int removeY = seam[x];
+      for (int y = 0; y < newPicture.height(); y++) {
+        if (y < removeY) {
+          newPicture.setARGB(x, y, picture.getARGB(x, y));
+        } else {
+          newPicture.setARGB(x, y, picture.getARGB(x, y+1));
+        }
+      }
+    }
+    picture = newPicture;
+
+    // recalculate energy for along seam & move energy over
+    for (int x = 0; x < newPicture.width(); x++) {
+      int removeY = seam[x];
+      for (int y = 0; y < newPicture.height(); y++) {
+        if (y < removeY-1) {
+          newEnergy[y][x] = energyField[y][x];
+        } else if (y > removeY+1) {
+          newEnergy[y][x] = energyField[y+1][x];
+        } else {
+          newEnergy[y][x] = calculateEnergy(x, y);
+        }
+      }
+    }
+    energyField = newEnergy;
+  }
 
   // remove vertical seam from current picture
   public void removeVerticalSeam(int[] seam) {
