@@ -37,6 +37,7 @@ public class SeamCarver {
 
   // energy of pixel at column x and row y
   public double energy(int x, int y) {
+    checkBounds(x, y);
     return energyField[y][x];
   }
 
@@ -211,12 +212,25 @@ public class SeamCarver {
 
   // remove horizontal seam from current picture
   public void removeHorizontalSeam(int[] seam) {
+    if (seam == null || seam.length != width() || height() <= 1) {
+      throw new IllegalArgumentException();
+    }
+    for (int i = 0; i < seam.length-1; i++) {
+      if (Math.abs(seam[i] - seam[i+1]) > 1) {
+        throw new IllegalArgumentException();
+      }
+    }
+
     Picture newPicture = new Picture(picture.width(), picture.height()-1);
     double[][] newEnergy = new double[picture.height()-1][picture.width()];
 
     // put & shift pixels to new image
     for (int x = 0; x < newPicture.width(); x++) {
       int removeY = seam[x];
+      if (removeY < 0 || removeY >= height()) {
+        throw new IllegalArgumentException();
+      }
+
       for (int y = 0; y < newPicture.height(); y++) {
         if (y < removeY) {
           newPicture.setARGB(x, y, picture.getARGB(x, y));
@@ -245,12 +259,25 @@ public class SeamCarver {
 
   // remove vertical seam from current picture
   public void removeVerticalSeam(int[] seam) {
+    if (seam == null || seam.length != height() || width() <= 1) {
+      throw new IllegalArgumentException();
+    }
+    for (int i = 0; i < seam.length-1; i++) {
+      if (Math.abs(seam[i] - seam[i+1]) > 1) {
+        throw new IllegalArgumentException();
+      }
+    }
+
     Picture newPicture = new Picture(picture.width() - 1, picture.height());
     double[][] newEnergy = new double[picture.height()][picture.width()-1];
 
     // put & shift pixels to new image
     for (int y = 0; y < newPicture.height(); y++) {
       int removeX = seam[y];
+      if (removeX < 0 || removeX >= width()) {
+        throw new IllegalArgumentException();
+      }
+      
       for (int x = 0; x < newPicture.width(); x++) {
         if (x < removeX) {
           newPicture.setARGB(x, y, picture.getARGB(x, y));
@@ -275,6 +302,12 @@ public class SeamCarver {
       }
     }
     energyField = newEnergy;
+  }
+
+  private void checkBounds(int x, int y) {
+    if (x < 0 || x >= width() || y < 0 || y >= height()) {
+      throw new IllegalArgumentException();
+    }
   }
 
   //  unit testing (optional)
