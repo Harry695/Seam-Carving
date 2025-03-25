@@ -247,7 +247,7 @@ public class SeamCarver {
       for (int y = 0; y < newPicture.height(); y++) {
         if (y < removeY-1) {
           newEnergy[y][x] = energyField[y][x];
-        } else if (y > removeY+1) {
+        } else if (y > removeY) {
           newEnergy[y][x] = energyField[y+1][x];
         } else {
           newEnergy[y][x] = calculateEnergy(x, y);
@@ -294,7 +294,7 @@ public class SeamCarver {
       for (int x = 0; x < newPicture.width(); x++) {
         if (x < removeX-1) {
           newEnergy[y][x] = energyField[y][x];
-        } else if (x > removeX+1) {
+        } else if (x > removeX) {
           newEnergy[y][x] = energyField[y][x+1];
         } else {
           newEnergy[y][x] = calculateEnergy(x, y);
