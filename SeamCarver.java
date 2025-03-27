@@ -280,9 +280,9 @@ public class SeamCarver {
       
       for (int x = 0; x < newPicture.width(); x++) {
         if (x < removeX) {
-          newPicture.setARGB(x, y, picture.getARGB(x, y));
+          newPicture.setRGB(x, y, picture.getRGB(x, y));
         } else {
-          newPicture.setARGB(x, y, picture.getARGB(x+1, y));
+          newPicture.setRGB(x, y, picture.getRGB(x+1, y));
         }
       }
     }
