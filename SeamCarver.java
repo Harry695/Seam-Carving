@@ -9,6 +9,10 @@ public class SeamCarver {
 
   // create a seam carver object based on the given picture
   public SeamCarver(Picture picture) {
+    if (picture == null) {
+      throw new IllegalArgumentException();
+    }
+    
     this.picture = new Picture(picture);
     energyField = new double[picture.height()][picture.width()];
 
@@ -233,9 +237,9 @@ public class SeamCarver {
 
       for (int y = 0; y < newPicture.height(); y++) {
         if (y < removeY) {
-          newPicture.setARGB(x, y, picture.getARGB(x, y));
+          newPicture.setRGB(x, y, picture.getRGB(x, y));
         } else {
-          newPicture.setARGB(x, y, picture.getARGB(x, y+1));
+          newPicture.setRGB(x, y, picture.getRGB(x, y+1));
         }
       }
     }
